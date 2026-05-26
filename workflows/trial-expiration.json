@@ -1,0 +1,426 @@
+{
+  "name": "Trial Expiration",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "28c8177a-5000-46e1-9317-dff4d821fbb7",
+      "name": "Ejecutar Revisión Diaria"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Usuarios Trading",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "0bb23471-0921-46ec-9daf-66fefe830e4e",
+      "name": "Buscar Usuarios en Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "23da9eff-7f94-423c-b19e-7091bec82a8d",
+              "leftValue": "={{ Math.floor($now.diff(DateTime.fromISO($json.fecha_ingreso), 'days').days) }}",
+              "rightValue": "={{ 30 }}",
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "0eb0844d-215d-4258-99be-238684db4e1f",
+              "leftValue": "={{ ($json.estado || '').toLowerCase() }}",
+              "rightValue": "trial_vencido",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "3f69d6b6-202b-4a0b-a645-b0e40d525949",
+              "leftValue": "={{ ($json.estado || '').toLowerCase().trim() }}",
+              "rightValue": "activo",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "540980b4-2cd8-450d-afa7-bab02c62b46d",
+      "name": "IF Trial Vencido"
+    },
+    {
+      "parameters": {
+        "url": "https://api.telegram.org/botYOUR_TELEGRAM_BOT_TOKEN/kickChatMember",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "-100YOUR_PREMIUM_CHANNEL_ID"
+            },
+            {
+              "name": "user_id",
+              "value": "={{ $json.user_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        832,
+        -128
+      ],
+      "id": "b775ee62-a469-4f16-9bee-3425818cd9df",
+      "name": "Expulsar Usuario del Canal"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Usuarios Trading",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_id": "={{ $('Buscar Usuarios en Sheets').item.json.user_id }}",
+            "estado": "trial_vencido",
+            "fecha_expulsion": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "user_id"
+          ],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "first_name",
+              "displayName": "first_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_name",
+              "displayName": "last_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_ingreso",
+              "displayName": "fecha_ingreso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "dias_en_grupo",
+              "displayName": "dias_en_grupo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mensaje_dia_15_enviado",
+              "displayName": "mensaje_dia_15_enviado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mensaje_dia_27_enviado",
+              "displayName": "mensaje_dia_27_enviado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_expulsion",
+              "displayName": "fecha_expulsion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1248,
+        -128
+      ],
+      "id": "41307c26-ccea-4749-8322-7d9beaad17bb",
+      "name": "Marcar Trial Vencido",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.user_id }}",
+        "text": "⛔ <b>Tu trial gratuito finalizó</b>  Ya se cumplieron los 30 días de prueba del canal privado.  Para continuar con acceso, la membresía mensual es de <b>150 USD</b>.  Si querés reactivar tu acceso o consultar cómo seguir, escribile a the admin: @your_admin_username.",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        -128
+      ],
+      "id": "4009eff7-f43d-4b85-9d49-974b784fd32f",
+      "name": "Avisar Trial Finalizado",
+      "webhookId": "859bf6c7-864b-4c6b-a30d-9a25ffe789e5",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.telegram.org/botYOUR_TELEGRAM_BOT_TOKEN/unbanChatMember",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "=chat_id",
+              "value": "={{ $('Expulsar Usuario del Canal').params.queryParameters.parameters.find(p => p.name === 'chat_id').value }}"
+            },
+            {
+              "name": "user_id",
+              "value": "={{ $('Buscar Usuarios en Sheets').item.json.user_id }}"
+            },
+            {
+              "name": "only_if_banned",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1040,
+        -128
+      ],
+      "id": "8be2ee6d-4915-45db-ab6b-a49ba16ba496",
+      "name": "Desbloquear Usuario del Canal"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Ejecutar Revisión Diaria": {
+      "main": [
+        [
+          {
+            "node": "Buscar Usuarios en Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Usuarios en Sheets": {
+      "main": [
+        [
+          {
+            "node": "IF Trial Vencido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Trial Vencido": {
+      "main": [
+        [
+          {
+            "node": "Avisar Trial Finalizado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Expulsar Usuario del Canal": {
+      "main": [
+        [
+          {
+            "node": "Desbloquear Usuario del Canal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avisar Trial Finalizado": {
+      "main": [
+        [
+          {
+            "node": "Expulsar Usuario del Canal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Desbloquear Usuario del Canal": {
+      "main": [
+        [
+          {
+            "node": "Marcar Trial Vencido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "01b485c3-3d16-42c0-94b2-d5574ab49a76",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "id": "wHs9zcsYT2l176HM",
+  "tags": []
+}

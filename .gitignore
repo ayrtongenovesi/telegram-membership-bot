@@ -1,0 +1,33 @@
+# Environment
+.env
+.env.local
+*.env
+
+# Credentials & secrets
+credentials/
+*credentials*
+*secret*
+*token*
+oauth*.json
+service-account*.json
+
+# Raw / pre-sanitized exports (NEVER commit)
+workflows-raw/
+*-raw.json
+
+# Local notes
+notes/
+TODO-personal.md
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Dependencies
+node_modules/

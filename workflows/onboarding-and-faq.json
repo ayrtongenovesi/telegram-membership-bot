@@ -1,0 +1,1676 @@
+{
+  "name": "Onboarding and FAQ",
+  "nodes": [
+    {
+      "parameters": {
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "text": "={{ $json.candidates[0].content.parts[0].text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1248,
+        1216
+      ],
+      "id": "ceb20dae-f58f-44a5-834b-eceac7ae68a0",
+      "name": "Responder FAQ",
+      "webhookId": "9d757f48-ed22-46c4-b333-f180e2bd3767",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "*"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -224,
+        -16
+      ],
+      "id": "d91e70a5-0bce-4f07-a6a7-a43520536763",
+      "name": "Recibir Mensaje del Usuario",
+      "webhookId": "bd09d1f6-a2ff-412e-8f0f-155e11c1aeba",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1d0a69f9-f180-42be-9ad1-05c64fdd7f04",
+              "leftValue": "={{ $json.message.text || '' }}",
+              "rightValue": "/start",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        672
+      ],
+      "id": "714a6d87-59d9-40bf-9735-0b55c16e4ce3",
+      "name": "IF Usuario Inicia Bot"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Usuarios Trading",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        528
+      ],
+      "id": "7a88b4b5-20af-49aa-94fe-458b6e349189",
+      "name": "Buscar Usuario en Sheets",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cf626724-151e-4465-ad24-0b1dfc5fb83a",
+              "leftValue": "={{ $('Buscar Usuario en Sheets').all().map(item => item.json.user_id).includes($('Recibir Mensaje del Usuario').item.json.message.from.id) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        832,
+        528
+      ],
+      "id": "bdf9df1e-c388-4532-9e63-fcff041c50c4",
+      "name": "IF Usuario Ya Registrado"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "text": "⚠️ <b>Tu trial ya fue activado anteriormente</b>  El acceso gratuito de 30 días se puede usar una sola vez por usuario.  Si querés volver a entrar al canal privado o consultar por la membresía, escribile a the admin: @your_admin_username.",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        432
+      ],
+      "id": "405640cf-d96f-4768-b2e7-2af1fd195b60",
+      "name": "Avisar Trial Ya Usado",
+      "webhookId": "d4080de1-cb21-4526-8587-0383cf73089f",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Usuarios Trading",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_id": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+            "username": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.username }}",
+            "first_name": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.first_name }}",
+            "last_name": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.last_name }}",
+            "fecha_ingreso": "={{ $now.toISO() }}",
+            "dias_en_grupo": "0",
+            "mensaje_dia_15_enviado": "no",
+            "mensaje_dia_27_enviado": "no",
+            "estado": "activo"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "first_name",
+              "displayName": "first_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_name",
+              "displayName": "last_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_ingreso",
+              "displayName": "fecha_ingreso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "dias_en_grupo",
+              "displayName": "dias_en_grupo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mensaje_dia_15_enviado",
+              "displayName": "mensaje_dia_15_enviado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "mensaje_dia_27_enviado",
+              "displayName": "mensaje_dia_27_enviado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha_expulsion",
+              "displayName": "fecha_expulsion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        624
+      ],
+      "id": "2b0c487e-3296-4e94-9b58-58d768409a4d",
+      "name": "Registrar Usuario Nuevo",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.telegram.org/botYOUR_TELEGRAM_BOT_TOKEN/createChatInviteLink",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "-100YOUR_PREMIUM_CHANNEL_ID"
+            },
+            {
+              "name": "creates_join_request",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1248,
+        624
+      ],
+      "id": "dee40748-ad95-4524-80bf-0b2a1446371f",
+      "name": "Crear Link Único Telegram"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "text": "📈 <b>Bienvenido a Premium Channel</b>  Tenés acceso a un <b>trial gratuito de 30 días</b> para conocer el canal privado de señales.  Dentro del canal vas a poder ver las operaciones que comparta the admin y seguir las indicaciones paso a paso.  Tocá el botón de abajo para entrar al canal privado.",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Entrar al canal privado 🚀",
+                    "additionalFields": {
+                      "url": "={{ $json.result.invite_link }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1456,
+        624
+      ],
+      "id": "bb9bb119-e96e-497b-97c3-89e5aaf6b838",
+      "name": "Enviar Botón de Acceso",
+      "webhookId": "c85d40dd-fb5c-41ac-a1cb-d91cf4168c44",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-goog-api-key",
+              "value": "YOUR_GEMINI_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"contents\": [\n    {\n      \"role\": \"user\",\n      \"parts\": [\n        {\n          \"text\": `Sos el asistente oficial de Premium Channel, un sistema de atención para usuarios interesados en el canal de señales administrado por the admin.\n\nTu función:\n- Responder dudas frecuentes de usuarios interesados en el canal.\n- Responder siempre en español.\n- Usar un tono informal, cercano y profesional.\n- Hablar de \"vos\", no de \"usted\".\n- Ser breve, claro y directo.\n- Dar respuestas completas, pero sin extenderte de más.\n- No mostrar razonamiento, planificación, borradores ni análisis interno.\n- No inventar información.\n- No dar consejos financieros personalizados.\n- No dar opiniones propias sobre inversiones.\n- No hacer proyecciones de mercado.\n- No prometer resultados ni ganancias.\n- Podés usar algún emoji puntual si ayuda a ordenar visualmente la respuesta, pero sin exagerar.\n\nRegla importante:\nSi una pregunta requiere opinión personal, análisis financiero, consejo de inversión, proyección de mercado, recomendación específica, cuánto capital usar, si conviene entrar o no entrar a una operación, o algo que no esté en la información disponible, respondé exactamente:\n\"Esa consulta es mejor que te la responda the admin directamente. Escribile a @your_admin_username y se va a poner en contacto con vos.\"\n\nInformación general de Premium Channel:\n- Premium Channel tiene un canal público y un canal privado.\n- El canal público se usa para compartir resultados, contenido general y resolver algunas dudas. Funciona como espacio informativo para personas que están evaluando si quieren entrar a la membresía.\n- El canal privado es para usuarios que acceden al trial o pagan la membresía mensual.\n- En el canal privado se comparten las señales de trading.\n- Las señales son de cripto.\n- La app/broker que se usa para operar es BingX.\n- Los usuarios tienen un trial gratuito de 30 días.\n- No hace falta experiencia previa. El usuario solo tiene que seguir correctamente los pasos indicados para copiar la señal.\n- No hay capital mínimo obligatorio.\n- Las operaciones suelen ser de tipo scalp. Generalmente se cierran en minutos, aunque a veces pueden tardar más, incluso algunas horas, dependiendo de cómo se desarrolle el precio.\n- No hace falta estar todo el día pendiente. Si el usuario configura TP y SL como indica la señal, puede dejar la operación cargada.\n- Normalmente se comparten entre 1 y 2 operaciones por día.\n- No hay horarios fijos, pero se recomienda estar atento al canal a partir de las 11 AM, por la apertura del mercado de Nueva York.\n- La gestión de riesgo es importante. Los usuarios deben copiar el TP, SL y el apalancamiento que the admin comparte en cada operación.\n- El apalancamiento suele ser x10, pero el usuario siempre debe copiar el valor que indique the admin en cada señal.\n- El usuario puede hacer consultas personales. Si necesita algo más específico, the admin puede coordinar una videollamada.\n- Hay soporte.\n\nPrecios:\n- El trial gratuito dura 30 días.\n- Precio especial antes de que termine el trial: 73 USD.\n- Precio estándar después del trial: 150 USD.\n\nPagos:\n- Los pagos se manejan por transferencia con criptomonedas.\n- La suscripción se paga en USDT por red TRC20.\n- Dirección de pago USDT TRC20: YOUR_USDT_TRC20_ADDRESS\n- Antes de transferir, el usuario debe verificar que esté usando la red correcta: TRC20.\n- Para confirmar el pago o resolver dudas personales, el usuario debe hablar con the admin: @your_admin_username\n- Si el usuario pregunta por el pago, podés darle la dirección USDT TRC20.\n- Si el usuario pregunta si ya pagó, cómo confirmar un pago, si puede pagar de otra manera o si tiene un problema con una transferencia, derivalo a the admin.\n- Por ahora no se maneja Mercado Pago ni transferencia bancaria tradicional. Si preguntan por otro método, indicá que por ahora el pago se maneja en USDT por red TRC20 y que puede consultarlo con the admin.\n\nTutoriales:\n- Si el usuario pregunta cómo copiar una señal, cómo abrir una operación, cómo operar una señal o algo similar, respondé brevemente que el bot puede guiarlo paso a paso si escribe: \"cómo copio una señal\".\n- Si el usuario pregunta cómo cargar fondos, cómo comprar USDT, cómo fondear la cuenta, cómo depositar, cómo usar P2P o cómo pasar USDT a futuros, respondé brevemente que el bot puede guiarlo paso a paso si escribe: \"cómo cargo fondos\".\n\nPreguntas frecuentes y respuestas:\n\nPregunta: ¿En qué app opero?\nRespuesta: Operás en BingX.\n\nPregunta: ¿Necesito experiencia previa?\nRespuesta: No, no necesitás experiencia previa. Solo tenés que seguir correctamente los pasos para copiar la señal.\n\nPregunta: ¿Cuánto capital mínimo necesito?\nRespuesta: No hay un capital mínimo obligatorio.\n\nPregunta: ¿Las señales son para forex, cripto o binarias?\nRespuesta: Las señales son de cripto.\n\nPregunta: ¿Cuánto dura cada operación?\nRespuesta: Las operaciones son de tipo scalp. Generalmente se cierran en minutos, aunque a veces pueden tardar más, incluso algunas horas, dependiendo de cómo se desarrolle el precio.\n\nPregunta: ¿Tengo que estar todo el día pendiente?\nRespuesta: No. Una vez que copiás la operación y colocás el TP y SL que the admin comparte, podés cerrar BingX y dejar la operación configurada.\n\nPregunta: ¿Qué hago si entro tarde a una señal?\nRespuesta: Antes de entrar, revisá si el activo ya alcanzó el objetivo marcado. Si ya lo alcanzó, lo mejor es esperar la próxima señal. Si todavía sigue en curso, puede que aún estés a tiempo de sumarte.\n\nPregunta: ¿Cuántas señales mandan por día?\nRespuesta: Normalmente se mandan entre 1 y 2 operaciones por día.\n\nPregunta: ¿Hay horarios específicos?\nRespuesta: No hay un horario fijo, pero the admin recomienda estar pendiente del canal a partir de las 11 AM, que coincide con la apertura del mercado de Nueva York.\n\nPregunta: ¿Recomendás gestión de riesgo?\nRespuesta: Sí. La gestión de riesgo es importante. Los usuarios tienen que copiar el TP, SL y el apalancamiento que the admin comparte en cada operación. El apalancamiento suele ser x10, pero siempre hay que copiar lo que indique the admin en la señal.\n\nPregunta: ¿Puedo hacer dudas personales?\nRespuesta: Sí. Si tenés dudas personales, escribile a the admin: @your_admin_username. Si hace falta, se puede coordinar una videollamada.\n\nPregunta: ¿Hay soporte o estoy solo?\nRespuesta: Sí, hay soporte.\n\nPregunta: ¿Cuánto cuesta después del trial?\nRespuesta: El precio estándar después de los 30 días de prueba es de 150 USD. Si pagás antes de que termine el trial, tenés un precio especial de 73 USD.\n\nPregunta: ¿Cómo se paga?\nRespuesta: El pago se realiza en USDT por red TRC20. La dirección es: YOUR_USDT_TRC20_ADDRESS. Antes de transferir, verificá que estés usando la red TRC20. Para confirmar el pago, escribile a the admin: @your_admin_username.\n\nPregunta: ¿Cuál es la dirección de pago?\nRespuesta: La dirección para pagar en USDT por red TRC20 es: YOUR_USDT_TRC20_ADDRESS. Asegurate de usar la red TRC20 antes de transferir.\n\nPregunta: ¿A quién le escribo para pagar?\nRespuesta: Para coordinar o confirmar el pago, escribile a the admin: @your_admin_username.\n\nPregunta: ¿Puedo pagar por Mercado Pago, transferencia bancaria u otro método?\nRespuesta: Por ahora el pago se maneja en USDT por red TRC20. Si necesitás consultar otro método, escribile a the admin: @your_admin_username.\n\nPregunta: ¿Cuál es la diferencia entre el canal público y el privado?\nRespuesta: El canal público se usa para compartir resultados, contenido general y resolver algunas dudas. El canal privado es donde están las señales para quienes acceden al trial o pagan la membresía.\n\nPregunta: ¿Dónde están las señales?\nRespuesta: Las señales se comparten en el canal privado de Premium Channel. Podés acceder con el trial gratuito de 30 días o con la membresía mensual.\n\nPregunta del usuario:\n${$('Recibir Mensaje del Usuario').item.json.message.text}`\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"temperature\": 0.25,\n    \"maxOutputTokens\": 250,\n    \"thinkingConfig\": {\n      \"thinkingBudget\": 0\n    }\n  }\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1040,
+        1216
+      ],
+      "id": "0ca7b131-6b17-41df-bba8-6102f4293057",
+      "name": "Consultar FAQ con Gemini"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ad6ddf92-6020-44f6-b5db-67b5abadcfbe",
+              "leftValue": "={{ ($json.message.text || '').toLowerCase() }}",
+              "rightValue": "cop",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "6275a942-57af-4b97-9ec9-a8a9ee9c01bd",
+              "leftValue": "={{ ($json.message.text || '').toLowerCase() }}",
+              "rightValue": "señal",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        912
+      ],
+      "id": "e2486be3-45c2-4f95-a853-099fb01025bd",
+      "name": "IF Pregunta Copiar Señal"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "text": "📈 <b>Cómo copiar una señal en BingX</b>  Te voy a guiar paso a paso para copiar una operación.  La idea es que repliques exactamente los datos que the admin comparte en el canal: activo, dirección de la operación, apalancamiento, margen, TP y SL.",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        816
+      ],
+      "id": "849451b1-ae64-4c83-8ed2-fa1358e7d61f",
+      "name": "Tutorial Intro Copiar Señal",
+      "webhookId": "1c7e947f-8fa0-4035-a8b2-f0889f4d41ee",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "text": "<b>Paso 1</b>  Entrá a BingX y andá a la sección de <b>Futuros</b>.  Después seleccioná <b>Futuros Estándar</b>, que es donde vas a abrir la operación.",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        816
+      ],
+      "id": "7a58e07e-b0cf-457e-8cb3-7f38d4df1747",
+      "name": "Tutorial Paso 1 - Abrir Futuros",
+      "webhookId": "2be2a09a-b725-460f-bef0-5748e30a9024",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "file": "REPLACE_WITH_YOUR_PHOTO_FILE_ID",
+        "additionalFields": {
+          "caption": "<b>Paso 2</b>  Elegí el activo que the admin haya compartido en la señal.  Por ejemplo, si la señal es <b>BTC/USDT</b>, buscás BTC/USDT dentro de <b>Futuros Estándar</b>.  📌 En esta pantalla también vas a ver las opciones para configurar Long/Short, apalancamiento, margen y TP/SL.",
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1248,
+        816
+      ],
+      "id": "c5781ac6-94a3-433e-becb-3b265b42cc2e",
+      "name": "Tutorial Paso 2 - Elegir Activo",
+      "webhookId": "fea3f100-8604-4c50-840a-884caee987c4",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "text": "<b>Paso 3</b>  Revisá si la señal indica <b>Long</b> o <b>Short</b> y elegí la opción correspondiente.  Después configurá el apalancamiento que indique the admin. Por lo general se usa <b>x10</b>, pero siempre copiá el valor que aparezca en la señal.  En <b>Margen</b>, colocás el monto que vos decidas usar para esa operación.",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1456,
+        816
+      ],
+      "id": "83afa9c9-8695-48a7-bed3-830ca955d8a3",
+      "name": "Tutorial Paso 3 - Long Short y Apalancamiento",
+      "webhookId": "455c9591-9b76-4519-8e0f-7bcd2ec16a52",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "text": "<b>Paso 4</b>  Configurá el <b>TP/SL</b> desde la opción que aparece en azul.  El <b>TP</b> es el objetivo de ganancia y el <b>SL</b> es el límite de pérdida.  ⚠️ Es importante cargar ambos antes de confirmar la operación.",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1664,
+        816
+      ],
+      "id": "b4a9de88-7221-4e52-b454-a309bb644c2f",
+      "name": "Tutorial Paso 4 - TP y SL",
+      "webhookId": "a56b6047-013f-42de-a78a-ad7a91cba5da",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "file": "REPLACE_WITH_YOUR_PHOTO_FILE_ID",
+        "additionalFields": {
+          "caption": "<b>Paso 5</b>  Antes de confirmar, revisá que esté todo correcto: activo, Long/Short, apalancamiento, margen, TP y SL.  Si todo coincide con la señal de the admin, confirmás la entrada y la operación se ejecuta a precio de mercado.",
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1872,
+        816
+      ],
+      "id": "f73ad115-e278-4df5-a58b-e6d8f045c030",
+      "name": "Tutorial Paso 5 - Confirmar Operación",
+      "webhookId": "61a52ae0-4d32-40ab-98bb-2086adb583b5",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "text": "✅ <b>Listo</b>  Una vez que la operación está abierta con TP y SL configurados, no tenés que hacer nada más.  Solo quedate atento al canal por si the admin avisa algún cambio.",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2080,
+        816
+      ],
+      "id": "c2c50e7a-e18b-4db1-9a11-3daf5846beb9",
+      "name": "Tutorial Cierre Copiar Señal",
+      "webhookId": "eff0b7ad-7d3b-4e92-b667-2baaab99b3fd",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "30c795a8-6306-47a4-a2a3-f4720f674718",
+              "leftValue": "={{ ($json.message.text || '').toLowerCase() }}",
+              "rightValue": "fond",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "2ce98221-6079-4af5-b4f3-f75f37371069",
+              "leftValue": "={{ ($json.message.text || '').toLowerCase() }}",
+              "rightValue": "usdt",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "4e4eaa34-4c4b-4c6c-ad91-002e4c9c02e5",
+              "leftValue": "={{ ($json.message.text || '').toLowerCase() }}",
+              "rightValue": "p2p",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "1c670463-cf3f-4f99-a464-5bc1c7bbd424",
+              "leftValue": "={{ ($json.message.text || '').toLowerCase() }}",
+              "rightValue": "deposit",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "d92a8a85-4539-47f7-907d-ca2eff384da8",
+              "leftValue": "={{ ($json.message.text || '').toLowerCase() }}",
+              "rightValue": "cargar",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        832,
+        1120
+      ],
+      "id": "6ca3a825-2ba4-4076-a78f-58a997d389f7",
+      "name": "IF Pregunta Cargar Fondos"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "text": "💳 <b>Cómo cargar USDT en BingX</b>  Te voy a guiar paso a paso para comprar USDT y dejarlos listos para operar.  Primero tenés que comprar USDT por <b>P2P</b> y después transferirlos desde <b>Fondo</b> hacia <b>Futuros Estándar</b>.",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        1024
+      ],
+      "id": "0d7a8b4a-6655-4a9f-9643-970052e75cb2",
+      "name": "Tutorial Fondos Intro",
+      "webhookId": "28160025-2eb4-42ab-a9fc-cf227cf2df4e",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "file": "REPLACE_WITH_YOUR_PHOTO_FILE_ID",
+        "additionalFields": {
+          "caption": "<b>Paso 1</b>  Entrá a la sección de activos en BingX y buscá <b>Trading P2P</b>.  Desde ahí vas a poder comprar USDT a otra persona dentro de la plataforma.",
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1248,
+        1024
+      ],
+      "id": "3387dad9-64d8-4b03-8c52-e8da954dd841",
+      "name": "Tutorial Fondos Paso 1 - Ir a P2P",
+      "webhookId": "f3f81e01-f223-49fd-9efd-48911551e11f",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "file": "REPLACE_WITH_YOUR_PHOTO_FILE_ID",
+        "additionalFields": {
+          "caption": "<b>Paso 2</b>  Elegí una persona que esté vendiendo <b>USDT</b>.  📌 Revisá el precio, los límites de compra, los métodos de pago y la reputación del vendedor antes de avanzar.",
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1456,
+        1024
+      ],
+      "id": "caf00616-06a2-4175-b7ed-ab5e4c5bf48e",
+      "name": "Tutorial Fondos Paso 2 - Elegir Vendedor",
+      "webhookId": "970a4301-8999-4ee5-95e0-192bd1652aeb",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "file": "REPLACE_WITH_YOUR_PHOTO_FILE_ID",
+        "additionalFields": {
+          "caption": "<b>Paso 3</b>  Ingresá el monto que querés comprar y elegí el método de pago disponible.  Después BingX te va a mostrar los datos para transferir los pesos.  Cuando el vendedor confirme el pago, libera los USDT y se acreditan en tu cuenta.",
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1664,
+        1024
+      ],
+      "id": "336c1ba0-6e65-4640-8130-3fc75453eef5",
+      "name": "Tutorial Fondos Paso 3 - Transferir y Recibir USDT",
+      "webhookId": "4ea76acd-638d-4f4b-b17b-caec50083e36",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "file": "REPLACE_WITH_YOUR_PHOTO_FILE_ID",
+        "additionalFields": {
+          "caption": "<b>Paso 4</b>  Cuando ya tengas los USDT acreditados, transferilos desde <b>Fondo</b> hacia <b>Futuros Estándar</b>.  Este paso es necesario para poder usar esos USDT en las operaciones de futuros.",
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1872,
+        1024
+      ],
+      "id": "f3a6f897-0e39-41a0-9034-e27e1124fb62",
+      "name": "Tutorial Fondos Paso 4 - Pasar a Futuros",
+      "webhookId": "84aa4140-d92b-4461-a12f-5bf99d200cda",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.from.id }}",
+        "text": "✅ <b>Listo</b>  Cuando los USDT ya estén en <b>Futuros Estándar</b>, quedan disponibles para copiar las señales que comparta the admin.  Si tenés algún problema cargando fondos o transfiriendo los USDT dentro de BingX, escribile a the admin: @your_admin_username.",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2080,
+        1024
+      ],
+      "id": "b7e42a2c-2938-45db-b616-14eecf6d1fc0",
+      "name": "Tutorial Fondos Cierre",
+      "webhookId": "bf2eee02-15f2-454c-aa86-e73626e11192",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f93ea939-5a6c-476f-b192-953297050398",
+              "leftValue": "={{ !!$json.chat_join_request }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -16,
+        -16
+      ],
+      "id": "40ebeaff-f103-40c6-ac80-411bdcc88315",
+      "name": "IF Es Solicitud de Ingreso"
+    },
+    {
+      "parameters": {
+        "url": "https://api.telegram.org/botYOUR_TELEGRAM_BOT_TOKEN/approveChatJoinRequest",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "-100YOUR_PREMIUM_CHANNEL_ID"
+            },
+            {
+              "name": "user_id",
+              "value": "={{ $('Recibir Mensaje del Usuario').item.json.chat_join_request.from.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        192,
+        -192
+      ],
+      "id": "0fb25d6d-d669-4168-847f-040cbf925670",
+      "name": "Aprobar Ingreso al Canal"
+    },
+    {
+      "parameters": {
+        "chatId": "-100YOUR_PREMIUM_CHANNEL_ID",
+        "text": "={{ `👋 <b>Bienvenido, ${$('Recibir Mensaje del Usuario').item.json.chat_join_request.from.first_name || 'nuevo miembro'}.</b>  Tu trial gratuito de 30 días ya quedó activo en Premium Channel.  📌 Te recomendamos revisar el mensaje fijado del canal para entender cómo copiar señales, cargar fondos y usar el bot si necesitás ayuda.  Para dudas personales o pagos, podés escribirle a the admin: @your_admin_username.` }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        -192
+      ],
+      "id": "c86e171e-1a4c-4366-a2b4-237fdcbc83c6",
+      "name": "Bienvenida en Canal VIP",
+      "webhookId": "a28837e3-cee2-4baa-b33a-d33ec8f53c3e",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "35ecbbe5-1b9c-4c88-80c8-784e382092a9",
+              "leftValue": "={{ /^\\/pago(\\s|$)/i.test($json.message?.text || '') }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        192,
+        240
+      ],
+      "id": "98f32ce0-2ec5-4099-89e2-b33a96aaad59",
+      "name": "IF Es Comando Pago"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bbfcc8ac-c2ac-4480-a63e-e3bdc1e525bc",
+              "leftValue": "={{ ['your_admin_username','admin_user_2','admin_user_3'].includes(($json.message?.from?.username || '').toLowerCase()) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        128
+      ],
+      "id": "fe8ac894-f2d4-414a-a5c4-2f6f126820a1",
+      "name": "IF Es Admin"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0cd8c387-429c-4b60-827c-33af5e1ca19b",
+              "name": "target_username",
+              "value": "={{ (($('Recibir Mensaje del Usuario').item.json.message.text || '').trim().split(/\\s+/)[1] || '').replace(/^@/, '').toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "bf3deeef-254b-47e9-8fb8-4c3222f6b3cf",
+              "name": "fecha_pago",
+              "value": "={{ $now.toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            },
+            {
+              "id": "298d6e78-0e9c-4a50-8f20-c3eade463202",
+              "name": "vencimiento_membresia",
+              "value": "={{ $now.plus({ days: 30 }).toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        0
+      ],
+      "id": "49394769-bb8c-40a2-9d86-e37b0ae28b6a",
+      "name": "Preparar Datos Pago"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Usuarios Trading",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "username": "={{ $('Preparar Datos Pago').item.json.target_username }}",
+            "estado": "membresia_activa",
+            "fecha_pago": "={{ $('Preparar Datos Pago').item.json.fecha_pago }}",
+            "vencimiento_membresia": "={{ $('Preparar Datos Pago').item.json.vencimiento_membresia }}"
+          },
+          "matchingColumns": [
+            "username"
+          ],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "first_name",
+              "displayName": "first_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_name",
+              "displayName": "last_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_ingreso",
+              "displayName": "fecha_ingreso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "dias_en_grupo",
+              "displayName": "dias_en_grupo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mensaje_dia_15_enviado",
+              "displayName": "mensaje_dia_15_enviado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mensaje_dia_27_enviado",
+              "displayName": "mensaje_dia_27_enviado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_expulsion",
+              "displayName": "fecha_expulsion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_pago",
+              "displayName": "fecha_pago",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "vencimiento_membresia",
+              "displayName": "vencimiento_membresia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notas",
+              "displayName": "notas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        832,
+        0
+      ],
+      "id": "3defeb10-4294-4380-a5d6-61dad5630d83",
+      "name": "Actualizar Usuario Pago",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.chat.id }}",
+        "text": "={{ `✅ <b>Membresía activada</b>  El usuario @${$('Preparar Datos Pago').item.json.target_username} quedó marcado como miembro activo.  📅 Fecha de pago: <b>${$('Preparar Datos Pago').item.json.fecha_pago}</b> ⏳ Vencimiento: <b>${$('Preparar Datos Pago').item.json.vencimiento_membresia}</b>` }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "205ead8e-f29c-4f8d-a212-eb8ae5228078",
+      "name": "Confirmar Pago al Admin",
+      "webhookId": "54178af5-3bb7-42f8-927a-055b5400a9ce",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Actualizar Usuario Pago').item.json.user_id }}",
+        "text": "={{ `✅ <b>Tu membresía quedó activa</b>  Tu acceso a <b>Premium Channel</b> fue renovado correctamente.  📅 Vencimiento de la membresía: <b>${$('Preparar Datos Pago').item.json.vencimiento_membresia}</b>  Gracias por seguir dentro de Premium Channel.` }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "5c24d5cc-1391-44d9-893a-8729fbccdbb2",
+      "name": "Avisar Membresía Activa al Usuario",
+      "webhookId": "dbd0fcf9-e4c4-4f70-8118-4c417cbdb1d0",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Recibir Mensaje del Usuario').item.json.message.chat.id }}",
+        "text": "⛔ <b>No tenés permisos para usar este comando.</b>",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        224
+      ],
+      "id": "d19dc113-06ec-4a8b-8855-d5e559a109ac",
+      "name": "Avisar Sin Permisos",
+      "webhookId": "e3beb1d5-8b39-456e-812f-751102ac639a",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Premium Channel PROD"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Recibir Mensaje del Usuario": {
+      "main": [
+        [
+          {
+            "node": "IF Es Solicitud de Ingreso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Usuario Inicia Bot": {
+      "main": [
+        [
+          {
+            "node": "Buscar Usuario en Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF Pregunta Copiar Señal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Usuario en Sheets": {
+      "main": [
+        [
+          {
+            "node": "IF Usuario Ya Registrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Usuario Ya Registrado": {
+      "main": [
+        [
+          {
+            "node": "Avisar Trial Ya Usado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Registrar Usuario Nuevo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Usuario Nuevo": {
+      "main": [
+        [
+          {
+            "node": "Crear Link Único Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear Link Único Telegram": {
+      "main": [
+        [
+          {
+            "node": "Enviar Botón de Acceso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar FAQ con Gemini": {
+      "main": [
+        [
+          {
+            "node": "Responder FAQ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Pregunta Copiar Señal": {
+      "main": [
+        [
+          {
+            "node": "Tutorial Intro Copiar Señal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF Pregunta Cargar Fondos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tutorial Intro Copiar Señal": {
+      "main": [
+        [
+          {
+            "node": "Tutorial Paso 1 - Abrir Futuros",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tutorial Paso 1 - Abrir Futuros": {
+      "main": [
+        [
+          {
+            "node": "Tutorial Paso 2 - Elegir Activo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tutorial Paso 2 - Elegir Activo": {
+      "main": [
+        [
+          {
+            "node": "Tutorial Paso 3 - Long Short y Apalancamiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tutorial Paso 3 - Long Short y Apalancamiento": {
+      "main": [
+        [
+          {
+            "node": "Tutorial Paso 4 - TP y SL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tutorial Paso 4 - TP y SL": {
+      "main": [
+        [
+          {
+            "node": "Tutorial Paso 5 - Confirmar Operación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tutorial Paso 5 - Confirmar Operación": {
+      "main": [
+        [
+          {
+            "node": "Tutorial Cierre Copiar Señal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Pregunta Cargar Fondos": {
+      "main": [
+        [
+          {
+            "node": "Tutorial Fondos Intro",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Consultar FAQ con Gemini",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tutorial Fondos Intro": {
+      "main": [
+        [
+          {
+            "node": "Tutorial Fondos Paso 1 - Ir a P2P",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tutorial Fondos Paso 1 - Ir a P2P": {
+      "main": [
+        [
+          {
+            "node": "Tutorial Fondos Paso 2 - Elegir Vendedor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tutorial Fondos Paso 2 - Elegir Vendedor": {
+      "main": [
+        [
+          {
+            "node": "Tutorial Fondos Paso 3 - Transferir y Recibir USDT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tutorial Fondos Paso 3 - Transferir y Recibir USDT": {
+      "main": [
+        [
+          {
+            "node": "Tutorial Fondos Paso 4 - Pasar a Futuros",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tutorial Fondos Paso 4 - Pasar a Futuros": {
+      "main": [
+        [
+          {
+            "node": "Tutorial Fondos Cierre",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Es Solicitud de Ingreso": {
+      "main": [
+        [
+          {
+            "node": "Aprobar Ingreso al Canal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF Es Comando Pago",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aprobar Ingreso al Canal": {
+      "main": [
+        [
+          {
+            "node": "Bienvenida en Canal VIP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Es Comando Pago": {
+      "main": [
+        [
+          {
+            "node": "IF Es Admin",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF Usuario Inicia Bot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Es Admin": {
+      "main": [
+        [
+          {
+            "node": "Preparar Datos Pago",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Avisar Sin Permisos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Datos Pago": {
+      "main": [
+        [
+          {
+            "node": "Actualizar Usuario Pago",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar Usuario Pago": {
+      "main": [
+        [
+          {
+            "node": "Confirmar Pago al Admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmar Pago al Admin": {
+      "main": [
+        [
+          {
+            "node": "Avisar Membresía Activa al Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "27eff3c6-bc7c-4a07-8734-eee1a38521af",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "id": "AI76JPe9mJHZCpFQ",
+  "tags": []
+}
